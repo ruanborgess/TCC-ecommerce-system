@@ -3,24 +3,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchProduto');
     const produtosGrid = document.getElementById('produtosGrid');
     const produtoCards = document.querySelectorAll('.produto-card');
+    const tipoPesquisa = document.getElementById('tipoPesquisa');
     
     // Busca
-    searchInput.addEventListener('input', function() {
-        const termo = this.value.toLowerCase().trim();
-        
+    searchInput.addEventListener('input', filtrarProdutos);
+    tipoPesquisa.addEventListener('change', filtrarProdutos);
+
+    function filtrarProdutos() {
+        const termo = searchInput.value.trim().toLowerCase();
+        const tipo = tipoPesquisa.value;
+
         produtoCards.forEach(card => {
-            const texto = [
-                card.getAttribute('data-nome'),
-                card.getAttribute('data-id'),
-                card.getAttribute('data-categoria'),
-                card.querySelector('.produto-detalhes')?.textContent
-            ].join(' ').toLowerCase();
-            
-            card.style.display = texto.includes(termo) ? '' : 'none';
+            const id = (card.getAttribute('data-id') || '').trim();
+            const nome = (card.getAttribute('data-nome') || '').toLowerCase();
+
+            let mostrar = false;
+            if (!termo) {
+                mostrar = true;
+            } else if (tipo === 'id') {
+                mostrar = id === termo;
+            } else if (tipo === 'nome') {
+                mostrar = nome.includes(termo);
+            }
+
+            card.style.display = mostrar ? '' : 'none';
         });
-        
+
         atualizarContadores();
-    });
+    }
 
     // Filtro por Categoria
     document.querySelectorAll('[data-filter]').forEach(btn => {

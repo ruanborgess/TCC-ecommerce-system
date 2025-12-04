@@ -395,6 +395,7 @@ body {
     margin: 0;
     color: var(--text-light);
     font-size: 0.9rem;
+    text-align: center;
 }
 
 .footer-links {
@@ -521,4 +522,9 @@ body {
 
 .admin-main::-webkit-scrollbar-thumb:hover {
     background: var(--primary-dark);
+}
+
+.footer-content {
+    justify-content: center;
+    text-align: center;
 }

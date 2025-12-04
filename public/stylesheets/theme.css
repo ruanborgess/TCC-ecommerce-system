@@ -24,7 +24,7 @@ body.dark-theme .profile-container,
 body.dark-theme .profile-form,
 body.dark-theme .list-group-item,
 body.dark-theme .accordion-body {
-    background: #23272f !important;
+    
     color: #e0e6ed !important;
     border: none !important;
     box-shadow: none !important;
@@ -381,7 +381,7 @@ body.dark-theme .category-card:hover {
 
 /* Corrige fundo das abas laterais em Opções */
 body.dark-theme .options-sidebar {
-    background: #181a20 !important;
+    background: #23272f !important;
     color: #e0e6ed !important;
     border-radius: 0 !important;
     border: none !important;
@@ -807,9 +807,6 @@ body.dark-theme .navbar-nav > .nav-item > .nav-link > .nav-icon {
 }
 
 /* Deixa o fundo da caixa do footer igual ao fundo do próprio footer no modo escuro */
-body.dark-theme .footer .container {
-    background: #20232a !important;
-}
 
 /* Deixa o footer inteiro com a cor do .container no modo escuro */
 body.dark-theme .footer {
@@ -1204,7 +1201,7 @@ body.dark-theme .footer .copyright {
     color: #b0b8c1 !important;
     border-top: 1px solid #2d3142 !important;
 }
-
+    
 /* ===== MENSAGEM DO CARRINHO NO TEMA ESCURO ===== */
 body.dark-theme .cart-message {
     background: linear-gradient(135deg, #51fa7b 0%, #28a745 100%) !important;
@@ -1543,7 +1540,3 @@ body[data-theme="dark"] footer#index-footer {
     box-shadow: none !important;
 }
 
-/* Evita que regras genéricas de footer.dark-theme sobrescrevam o index-footer */
-body.dark-theme footer.footer:not(#index-footer) {
-    /* footers normais do site continuam a responder ao tema escuro */
-}

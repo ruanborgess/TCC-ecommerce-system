@@ -744,3 +744,29 @@ body {
 .card-body > *:last-child {
     margin-bottom: 0;
 }
+
+/* ===== SELECT DE TIPO DE PESQUISA MAIS BONITO ===== */
+#tipoPesquisa {
+    background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0.7rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.13);
+    transition: box-shadow 0.2s, background 0.2s;
+    outline: none;
+    cursor: pointer;
+}
+
+#tipoPesquisa:focus {
+    box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.18);
+    background: linear-gradient(135deg, #3a56d4 0%, #3fb5d8 100%);
+}
+
+#tipoPesquisa option {
+    color: #23272f;
+    background: #f8f9fa;
+    font-weight: 500;
+}

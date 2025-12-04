@@ -37,27 +37,47 @@
 
                 <!-- Thumbnails -->
                 <div class="thumbnail-grid">
-                    <!-- Thumbnail da imagem principal -->
-                    <% if (produto.imagem) { %>
-                        <div class="thumbnail-item active" onclick="changeImage('<%= produto.imagem %>', this)">
-                            <img src="<%= produto.imagem %>" alt="Imagem Principal">
-                        </div>
-                    <% } %>
-                    
-                    <!-- Thumbnails adicionais -->
-                    <% if (produto.thumbnails) { %>
-                        <% produto.thumbnails.split(',').forEach((thumb, index) => { %>
-                            <div class="thumbnail-item" onclick="changeImage('<%= thumb %>', this)">
-                                <img src="<%= thumb %>" alt="Miniatura <%= index + 1 %>">
-                            </div>
-                        <% }); %>
-                    <% } %>
-                    
-                    <!-- Placeholder se não houver thumbnails -->
-                    <% if (!produto.thumbnails && !produto.imagem) { %>
+                    <%
+                      const makeUrl = (t) => {
+                        if (!t) return null;
+                        t = String(t).trim();
+                        if (!t) return null;
+                        if (/^(https?:\/\/|\/)/i.test(t)) return t;
+                        return '/uploads/' + t;
+                      };
+
+                      const thumbsRaw = [];
+                      if (produto && produto.imagem) thumbsRaw.push(produto.imagem);
+                      if (produto && produto.thumbnails) {
+                        try {
+                          const parsed = (typeof produto.thumbnails === 'string') ? JSON.parse(produto.thumbnails) : produto.thumbnails;
+                          if (Array.isArray(parsed)) parsed.forEach(t => { if (t) thumbsRaw.push(t); });
+                          else if (typeof parsed === 'string') parsed.split(',').forEach(t => { if (t) thumbsRaw.push(t); });
+                        } catch (e) {
+                          String(produto.thumbnails).split(',').forEach(t => { if (t) thumbsRaw.push(t); });
+                        }
+                      }
+
+                      // normaliza URLs e remove duplicatas (NÃO filtra por extensão)
+                      const seen = new Set();
+                      const thumbsClean = thumbsRaw
+                        .map(makeUrl)
+                        .filter(u => u && !seen.has(u) && (seen.add(u), true));
+                    %>
+
+                    <% if (thumbsClean.length === 0) { %>
                         <div class="thumbnail-item thumbnail-placeholder">
                             <i class="fas fa-image"></i>
                         </div>
+                    <% } else { %>
+                        <% thumbsClean.forEach((tUrl, index) => { 
+                              const filename = tUrl.split('/').pop();
+                        %>
+                          <div class="thumbnail-item <%= index === 0 ? 'active' : '' %>" data-thumb="<%= tUrl %>" onclick="handleThumbClick('<%= tUrl %>', this)">
+                              <!-- Tentamos exibir como imagem; se não for imagem ou falhar, onerror faz fallback -->
+                              <img src="<%= tUrl %>" alt="Miniatura <%= index + 1 %>" onerror="thumbFallback(this, '<%= filename %>')">
+                          </div>
+                        <% }) %>
                     <% } %>
                 </div>
             </div>
@@ -217,20 +237,104 @@
     </div>
 
     <script>
-        // Função para trocar a imagem principal
+        // Troca a visualização principal tentando sempre carregar como imagem.
+        // Só exibe preview de arquivo (ícone + nome) se o carregamento falhar.
         function changeImage(src, element) {
-            document.getElementById('mainImage').src = src;
-            
-            // Remove a classe active de todas as thumbnails
-            document.querySelectorAll('.thumbnail-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Adiciona a classe active na thumbnail clicada
-            element.classList.add('active');
+            const container = document.querySelector('.imagem-principal');
+            if (!container) return;
+
+            // garante que existe um elemento img principal
+            let mainImg = document.getElementById('mainImage');
+            let mainPreview = document.getElementById('mainPreview');
+
+            // cria img se não existir (mantém o elemento para onload/onerror)
+            if (!mainImg) {
+                const img = document.createElement('img');
+                img.id = 'mainImage';
+                img.className = 'img-fluid';
+                // remove preview se existir
+                if (mainPreview) mainPreview.remove();
+                container.innerHTML = '';
+                container.appendChild(img);
+                mainImg = img;
+            }
+
+            // configura handlers
+            mainImg.onload = function() {
+                // sucesso: remove preview se houver
+                const p = document.getElementById('mainPreview');
+                if (p) p.remove();
+                mainImg.style.display = '';
+            };
+            mainImg.onerror = function() {
+                // falha ao carregar como imagem -> mostra preview de arquivo
+                mainImg.style.display = 'none';
+                showFilePreview(src);
+            };
+
+            // inicia tentativa de carregar (sempre)
+            mainImg.src = src;
+
+            // atualiza classe ativa nas thumbnails
+            document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
+            if (element) element.classList.add('active');
         }
 
-        // Funções do modal
+        // mostra preview para arquivos que não carregam como imagem
+        function showFilePreview(src) {
+            const container = document.querySelector('.imagem-principal');
+            if (!container) return;
+
+            // remove img principal se existir
+            const mainImg = document.getElementById('mainImage');
+            if (mainImg) mainImg.remove();
+
+            let mainPreview = document.getElementById('mainPreview');
+            if (!mainPreview) {
+                mainPreview = document.createElement('div');
+                mainPreview.id = 'mainPreview';
+                mainPreview.className = 'file-preview';
+                container.innerHTML = '';
+                container.appendChild(mainPreview);
+            }
+
+            const filename = String(src).split('/').pop();
+            mainPreview.innerHTML = `
+                <div class="file-preview-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;color:inherit;">
+                    <i class="fas fa-file fa-3x" style="opacity:0.9;margin-bottom:0.8rem;"></i>
+                    <div class="file-name" style="text-align:center;">${filename}</div>
+                </div>
+            `;
+        }
+
+        // Handler chamado ao clicar numa thumb: somente troca a visualização principal
+        function handleThumbClick(src, el) {
+            changeImage(src, el);
+        }
+
+        // fallback onerror: substitui miniatura por ícone + nome (não abre ao clicar)
+        function thumbFallback(imgEl, filename) {
+            const container = imgEl.parentElement;
+            if (!container) return;
+            const url = container.getAttribute('data-thumb') || imgEl.src;
+            const ext = (filename || '').split('.').pop().toLowerCase();
+            let iconClass = 'fa-file';
+            if (['mp4','webm','ogg','mov','mkv'].includes(ext)) iconClass = 'fa-file-video';
+            else if (['mp3','wav','m4a','ogg'].includes(ext)) iconClass = 'fa-file-audio';
+            else if (ext === 'pdf') iconClass = 'fa-file-pdf';
+            else if (['zip','rar','7z'].includes(ext)) iconClass = 'fa-file-archive';
+
+            container.innerHTML = `
+                <div class="thumb-file" data-thumb="${url}">
+                    <i class="fas ${iconClass}"></i>
+                    <span class="thumb-filename">${filename}</span>
+                </div>
+            `;
+            // ao clicar, agora só atualiza a área principal (não abre nova aba)
+            container.onclick = function() { handleThumbClick(url, container); };
+        }
+
+        // modal de exclusão (sem alteração)
         function openDeleteModal() {
             document.getElementById('deleteModal').classList.add('active');
         }
@@ -239,11 +343,8 @@
             document.getElementById('deleteModal').classList.remove('active');
         }
 
-        // Fechar modal ao clicar fora
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeDeleteModal();
-            }
+        document.getElementById('deleteModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
         });
     </script>
 </body>

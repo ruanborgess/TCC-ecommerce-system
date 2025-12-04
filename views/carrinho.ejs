@@ -19,8 +19,9 @@
     <%- include('partials/navbar', { usuario: usuario }) %>
 
     <!-- Conteúdo da Página -->
-    <div class="container mt-5 pt-5">
-    <h1 class="mb-4">Carrinho de Compras</h1>
+    <main class="site-main">
+      <div class="container mt-5 pt-5">
+         <h1 class="mb-4">Carrinho de Compras</h1>
     <% if (carrinho && carrinho.length > 0 && typeof mensagemCompra !== 'undefined' && mensagemCompra) { %>
         <div class="alert alert-success text-center mt-4">
             <%= mensagemCompra %>
@@ -128,9 +129,10 @@
                 </div>
             <% } %>
         </div>
-    </div>
+      </div>
+    </main>
 
-    <%- include('partials/footer') %>
+     <%- include('partials/footer') %>
 
     <script>
 (function() {

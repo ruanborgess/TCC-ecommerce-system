@@ -381,41 +381,49 @@ function confirmarExclusaoAvaliacao(avaliacaoId, produtoId) {
     modal.show();
 }
 
+// Substitui o handler existente por versão que envia form-encoded (compatível com express.urlencoded),
+// inclui credentials e logs para debugar, e fecha o modal em sucesso.
 document.getElementById('confirmModalBtn').onclick = function() {
+    const modalEl = document.getElementById('confirmModal');
+    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+
+    function doFetch(path, paramsObj) {
+        const body = new URLSearchParams(paramsObj);
+        return fetch(path, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+            body: body.toString()
+        })
+        .then(resp => resp.json().catch(() => ({ ok: false, error: 'Resposta inválida' })))
+        .then(json => json)
+        .catch(err => ({ ok: false, error: err.message || String(err) }));
+    }
+
     if (excluirTipo === 'produto') {
-        fetch('/avaliacao/excluir-produto', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ produtoId: excluirId })
-        }).then(response => response.json())
-          .then(data => {
-              if (data.ok) {
-                  location.reload();
-              } else {
-                  alert('Erro ao excluir produto: ' + data.error);
-              }
-          })
-          .catch(error => {
-              console.error('Erro:', error);
-              alert('Erro ao excluir produto');
-          });
+        doFetch('/avaliacao/excluir-produto', { produtoId: excluirId })
+        .then(data => {
+            if (data.ok) {
+                modal.hide();
+                location.reload();
+            } else {
+                console.error('Erro excluir produto:', data);
+                modal.hide();
+                alert('Erro ao excluir produto: ' + (data.error || 'Erro desconhecido'));
+            }
+        });
     } else if (excluirTipo === 'avaliacao') {
-        fetch('/avaliacao/remover', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ avaliacaoId: excluirId, produtoId: excluirProdutoId })
-        }).then(response => response.json())
-          .then(data => {
-              if (data.ok) {
-                  location.reload();
-              } else {
-                  alert('Erro ao excluir avaliação: ' + data.error);
-              }
-          })
-          .catch(error => {
-              console.error('Erro:', error);
-              alert('Erro ao excluir avaliação');
-          });
+        doFetch('/avaliacao/remover', { avaliacaoId: excluirId, produtoId: excluirProdutoId })
+        .then(data => {
+            if (data.ok) {
+                modal.hide();
+                location.reload();
+            } else {
+                console.error('Erro excluir avaliacao:', data);
+                modal.hide();
+                alert('Erro ao excluir avaliação: ' + (data.error || 'Erro desconhecido'));
+            }
+        });
     }
 };
 

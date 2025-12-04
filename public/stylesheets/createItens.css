@@ -293,6 +293,43 @@ select.form-control option[value=""] {
     color: white;
 }
 
+/* ===== BOTÃO DE CADASTRAR PRODUTO MAIS BONITO ===== */
+.btn.btn-primary {
+    background: linear-gradient(90deg, #4361ee 0%, #4cc9f0 100%);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 1.1rem 2.2rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 8px 24px rgba(67, 97, 238, 0.18), 0 2px 8px rgba(76, 201, 240, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    transition: all 0.25s cubic-bezier(.4,0,.2,1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn.btn-primary i {
+    font-size: 1.3em;
+    margin-right: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.btn.btn-primary:hover {
+    background: linear-gradient(90deg, #3a56d4 0%, #3fb5d8 100%);
+    box-shadow: 0 12px 32px rgba(67, 97, 238, 0.25), 0 4px 16px rgba(76, 201, 240, 0.18);
+    transform: translateY(-2px) scale(1.03);
+    color: #fff;
+}
+
+.btn.btn-primary:hover i {
+    transform: scale(1.2) rotate(-8deg);
+}
+
 /* ===== ALERTAS ===== */
 .alert-custom {
     border-radius: 12px;
